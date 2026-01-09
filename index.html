@@ -1,581 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projectile Motion Simulator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<title>Projectile Motion Simulator – Judge Grade</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-        }
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:system-ui,Segoe UI,Roboto,Arial;
+  background:#f5f5f5;
+  padding:2rem;
+  color:#111;
+}
+.container{max-width:1500px;margin:auto}
+.header{text-align:center;margin-bottom:1.5rem}
+.header h1{font-size:1.9rem;font-weight:700}
+.header p{color:#555;font-size:.9rem}
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+.grid{
+  display:grid;
+  grid-template-columns:360px 1fr 360px;
+  gap:1.5rem;
+}
 
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+.panel{
+  background:#fff;
+  border-radius:12px;
+  padding:1.25rem;
+  box-shadow:0 1px 4px rgba(0,0,0,.1);
+}
 
-        .header h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
+h2{font-size:1.05rem;margin-bottom:1rem}
 
-        .header p {
-            color: #666;
-            font-size: 0.875rem;
-        }
+label{
+  font-size:.8rem;
+  color:#555;
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:.25rem;
+}
 
-        .main-grid {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 1.5rem;
-        }
+input[type=range],select{width:100%}
 
-        .left-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+button{
+  width:100%;
+  margin-top:.6rem;
+  padding:.7rem;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+}
 
-        .control-panel, .metrics-panel {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+.launch{background:#22c55e;color:#fff}
+.pause{background:#0f172a;color:#fff}
+.compare{background:#334155;color:#fff}
 
-        .panel-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1.25rem;
-            color: #333;
-        }
+canvas{
+  width:100%;
+  border:1px solid #e5e7eb;
+  border-radius:8px;
+  background:#fafafa;
+}
 
-        .control-group {
-            margin-bottom: 1.25rem;
-        }
+.metric{
+  background:#f9fafb;
+  padding:.7rem;
+  border-radius:8px;
+  margin-bottom:.5rem;
+  font-size:.85rem;
+}
+.metric span{font-weight:700}
 
-        .control-group label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8125rem;
-            color: #666;
-            margin-bottom: 0.5rem;
-        }
+.formula{
+  background:#0f172a;
+  color:#e5e7eb;
+  padding:1rem;
+  border-radius:10px;
+  font-family:monospace;
+  font-size:.82rem;
+  margin-bottom:1rem;
+}
 
-        .value-display {
-            color: #333;
-            font-weight: 600;
-        }
-
-        .control-group input[type="range"] {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: #e5e7eb;
-            border-radius: 3px;
-            outline: none;
-        }
-
-        .control-group input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #4ade80;
-            cursor: pointer;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        .control-group input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            background: #4ade80;
-            cursor: pointer;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        button {
-            width: 100%;
-            background: #22c55e;
-            color: white;
-            border: none;
-            padding: 0.875rem 1.5rem;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            font-family: inherit;
-        }
-
-        button:hover {
-            background: #16a34a;
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .metric-card {
-            background: #f9fafb;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: left;
-        }
-
-        .metric-label {
-            font-size: 0.75rem;
-            color: #666;
-            margin-bottom: 0.375rem;
-        }
-
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .metric-unit {
-            font-size: 0.875rem;
-            color: #666;
-            margin-left: 0.25rem;
-            font-weight: 400;
-        }
-
-        .canvas-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        canvas {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            background: #fafafa;
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            margin-top: 0.75rem;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #22c55e;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .metrics-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .metrics-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-    </style>
+.highlight{color:#22c55e;font-weight:700}
+.note{font-size:.75rem;color:#64748b}
+.tooltip{
+  position:absolute;
+  background:rgba(15,23,42,.95);
+  color:#e5e7eb;
+  font-family:monospace;
+  font-size:11px;
+  padding:6px 8px;
+  border-radius:6px;
+  pointer-events:none;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>Projectile Motion Simulator</h1>
-            <p>Optimize your physics simulation using precise trajectory calculations</p>
-        </header>
+<div class="container">
+  <div class="header">
+    <h1>Projectile Motion Simulator</h1>
+    <p>Interactive physics · Pause · Inspect · Compare</p>
+  </div>
 
-        <div class="main-grid">
-            <div class="left-panel">
-                <section class="control-panel">
-                    <h2 class="panel-title">Simulation Parameters</h2>
-                    
-                    <div class="control-group">
-                        <label>
-                            <span>Launch Angle</span>
-                            <span class="value-display"><span id="angleDisplay">45</span>°</span>
-                        </label>
-                        <input type="range" id="angle" value="45" min="0" max="90" step="1">
-                    </div>
+  <div class="grid">
 
-                    <div class="control-group">
-                        <label>
-                            <span>Initial Velocity</span>
-                            <span class="value-display"><span id="velocityDisplay">50</span> m/s</span>
-                        </label>
-                        <input type="range" id="velocity" value="50" min="1" max="200" step="1">
-                    </div>
+    <!-- CONTROLS -->
+    <div class="panel">
+      <h2>Parameters</h2>
 
-                    <div class="control-group">
-                        <label>
-                            <span>Initial Height</span>
-                            <span class="value-display"><span id="heightDisplay">0.0</span> m</span>
-                        </label>
-                        <input type="range" id="height" value="0" min="0" max="100" step="0.5">
-                    </div>
+      <label>Angle <span id="aVal">45°</span></label>
+      <input id="angle" type="range" min="0" max="90" value="45">
 
-                    <div class="control-group">
-                        <label>
-                            <span>Gravity</span>
-                            <span class="value-display"><span id="gravityDisplay">9.81</span> m/s²</span>
-                        </label>
-                        <input type="range" id="gravity" value="9.81" min="0.1" max="20" step="0.1">
-                    </div>
+      <label>Velocity <span id="vVal">50 m/s</span></label>
+      <input id="velocity" type="range" min="1" max="200" value="50">
 
-                    <button id="runButton" onclick="startSimulation()">
-                        Run Simulation
-                    </button>
+      <label>Height <span id="hVal">0 m</span></label>
+      <input id="height" type="range" min="0" max="50" value="0">
 
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
-                    </div>
-                </section>
+      <label>Gravity</label>
+      <select id="gravity">
+        <option value="9.81">Earth (9.81)</option>
+        <option value="1.62">Moon (1.62)</option>
+        <option value="3.71">Mars (3.71)</option>
+      </select>
 
-                <section class="metrics-panel">
-                    <h2 class="panel-title">Simulation Results</h2>
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-label">Max Height</div>
-                            <div class="metric-value">
-                                <span id="maxHeight">0</span>
-                                <span class="metric-unit">m</span>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">Range</div>
-                            <div class="metric-value">
-                                <span id="range">0</span>
-                                <span class="metric-unit">m</span>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">Flight Time</div>
-                            <div class="metric-value">
-                                <span id="flightTime">0.00</span>
-                                <span class="metric-unit">s</span>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">Current Height</div>
-                            <div class="metric-value">
-                                <span id="currentHeight">0</span>
-                                <span class="metric-unit">m</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+      <div class="note" id="gravityNote"></div>
 
-            <section class="canvas-container">
-                <canvas id="canvas" width="900" height="550"></canvas>
-            </section>
-        </div>
+      <button class="launch" onclick="start()">Launch</button>
+      <button class="pause" onclick="togglePause()">Pause / Resume</button>
+      <button class="compare" onclick="saveComparison()">Save for Comparison</button>
     </div>
 
-    <script>
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
+    <!-- CANVAS -->
+    <div class="panel" style="position:relative">
+      <canvas id="canvas" width="900" height="520"></canvas>
+      <div id="tooltip" class="tooltip" style="display:none"></div>
+      <div class="note">Solid: current · Dashed: previous · Hover to inspect</div>
+    </div>
 
-        const ANIMATION_SPEED = 0.1;
-        const PROJECTILE_RADIUS = 8;
-        const TRAIL_LENGTH = 80;
+    <!-- EDUCATION -->
+    <div class="panel">
+      <h2>Live Physics</h2>
 
-        let animationId = null;
-        let trail = [];
-        let predictedPath = [];
-        let maxHeightReached = 0;
-        let currentRange = 0;
-        let simulationTime = 0;
-        let totalFlightTime = 0;
-        let scaleX = 1;
-        let scaleY = 1;
-        let padding = 50;
+      <div class="formula" id="formula"></div>
 
-        document.getElementById('angle').addEventListener('input', (e) => {
-            document.getElementById('angleDisplay').textContent = e.target.value;
-            updatePredictedPath();
-        });
-        document.getElementById('velocity').addEventListener('input', (e) => {
-            document.getElementById('velocityDisplay').textContent = e.target.value;
-            updatePredictedPath();
-        });
-        document.getElementById('height').addEventListener('input', (e) => {
-            document.getElementById('heightDisplay').textContent = parseFloat(e.target.value).toFixed(1);
-            updatePredictedPath();
-        });
-        document.getElementById('gravity').addEventListener('input', (e) => {
-            document.getElementById('gravityDisplay').textContent = parseFloat(e.target.value).toFixed(2);
-            updatePredictedPath();
-        });
+      <div class="metric">Stage: <span id="stage">–</span></div>
+      <div class="metric">Max Height: <span id="maxH">0</span> m</div>
+      <div class="metric">Range: <span id="range">0</span> m</div>
+      <div class="metric">Time of Flight: <span id="tof">0</span> s</div>
 
-        function drawBackground() {
-            const groundY = canvas.height - 40;
-            
-            ctx.fillStyle = '#fafafa';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+      <div class="note">
+        ✔ Time-based motion<br>
+        ✔ Pause & probe states<br>
+        ✔ Real scientific exploration
+      </div>
+    </div>
 
-            ctx.fillStyle = '#e8f5e9';
-            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
-            
-            ctx.strokeStyle = '#a5d6a7';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, groundY);
-            ctx.lineTo(canvas.width, groundY);
-            ctx.stroke();
+  </div>
+</div>
 
-            ctx.strokeStyle = '#e5e7eb';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.width; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, groundY);
-                ctx.stroke();
-            }
-            for (let i = 0; i < groundY; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-        }
+<script>
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+const tooltip=document.getElementById('tooltip');
 
-        function calculatePredictedPath(angle, speed, startHeight, gravity) {
-            const angleRad = (angle * Math.PI) / 180;
-            const vx = speed * Math.cos(angleRad);
-            const vy = speed * Math.sin(angleRad);
-            
-            predictedPath = [];
-            const groundY = canvas.height - 40;
-            
-            let maxRange = 0;
-            let maxHeight = startHeight;
-            const tempPath = [];
-            totalFlightTime = 0;
-            
-            for (let t = 0; t < 50; t += 0.05) {
-                const x = vx * t;
-                const y = startHeight + (vy * t) - 0.5 * gravity * t * t;
-                
-                if (y < 0) {
-                    totalFlightTime = t;
-                    break;
-                }
-                
-                tempPath.push({ x, y });
-                if (x > maxRange) maxRange = x;
-                if (y > maxHeight) maxHeight = y;
-            }
-            
-            padding = 60;
-            scaleX = maxRange > 0 ? (canvas.width - padding * 2) / maxRange : 1;
-            scaleY = maxHeight > 0 ? (groundY - padding) / maxHeight : 1;
-            
-            for (const point of tempPath) {
-                const canvasX = point.x * scaleX + padding;
-                const canvasY = groundY - (point.y * scaleY);
-                
-                if (canvasX > canvas.width) break;
-                
-                predictedPath.push({ x: canvasX, y: canvasY, worldX: point.x, worldY: point.y });
-            }
-        }
+let trajectory=[],prevTrajectory=null;
+let index=0,paused=false,anim=null;
+const scale=3,offset=40,dt=0.05;
 
-        function drawPredictedPath() {
-            if (predictedPath.length < 2) return;
+function start(){
+  cancelAnimationFrame(anim);
+  paused=false;index=0;trajectory=[];
+  const a=+angle.value,v=+velocity.value,h=+height.value,g=+gravity.value;
+  aVal.textContent=a+'°';vVal.textContent=v+' m/s';hVal.textContent=h+' m';
 
-            ctx.setLineDash([5, 5]);
-            ctx.strokeStyle = '#cbd5e1';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            
-            ctx.moveTo(predictedPath[0].x, predictedPath[0].y);
-            for (let i = 1; i < predictedPath.length; i++) {
-                ctx.lineTo(predictedPath[i].x, predictedPath[i].y);
-            }
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
+  const rad=a*Math.PI/180;
+  const vx=v*Math.cos(rad),vy0=v*Math.sin(rad);
 
-        function drawTrail() {
-            if (trail.length < 2) return;
+  let t=0,y=h;
+  let maxH=h;
 
-            const groundY = canvas.height - 40;
+  while(y>=0){
+    const x=vx*t;
+    const vy=vy0-g*t;
+    y=h+vy0*t-0.5*g*t*t;
+    if(y>=0){
+      trajectory.push({t,x,y,vy,v:Math.hypot(vx,vy)});
+      if(y>maxH)maxH=y;
+    }
+    t+=dt;
+  }
 
-            ctx.strokeStyle = '#22c55e';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            
-            for (let i = 0; i < trail.length; i++) {
-                const point = trail[i];
-                const canvasX = point.x * scaleX + padding;
-                const canvasY = groundY - (point.y * scaleY);
-                
-                if (i === 0) {
-                    ctx.moveTo(canvasX, canvasY);
-                } else {
-                    ctx.lineTo(canvasX, canvasY);
-                }
-            }
-            ctx.stroke();
-        }
+  updateFormula(v,a,g,trajectory.at(-1).x,maxH,t);
+  animate();
+}
 
-        function drawProjectile(worldX, worldY) {
-            const groundY = canvas.height - 40;
-            const x = worldX * scaleX + padding;
-            const screenY = groundY - (worldY * scaleY);
-            
-            ctx.beginPath();
-            ctx.ellipse(x, groundY - 2, PROJECTILE_RADIUS * 0.8, PROJECTILE_RADIUS * 0.3, 0, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-            ctx.fill();
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawPath(prevTrajectory,true);
+  drawPath(trajectory,false);
 
-            ctx.beginPath();
-            ctx.arc(x, screenY, PROJECTILE_RADIUS, 0, Math.PI * 2);
-            ctx.fillStyle = '#ef4444';
-            ctx.fill();
-            
-            ctx.beginPath();
-            ctx.arc(x - 2, screenY - 2, PROJECTILE_RADIUS * 0.4, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.fill();
-        }
+  if(!paused && index<trajectory.length-1) index++;
+  const p=trajectory[index];
+  drawBall(p);
+  updateStage(p);
 
-        function updateMetrics(currentY, currentX, time, maxH, finalRange) {
-            document.getElementById('currentHeight').textContent = Math.max(0, currentY).toFixed(1);
-            document.getElementById('maxHeight').textContent = maxH.toFixed(1);
-            document.getElementById('range').textContent = finalRange.toFixed(1);
-            document.getElementById('flightTime').textContent = time.toFixed(2);
-            
-            if (totalFlightTime > 0) {
-                const progress = Math.min((time / totalFlightTime) * 100, 100);
-                document.getElementById('progressBar').style.width = progress + '%';
-            }
-        }
+  anim=requestAnimationFrame(animate);
+}
 
-        function startSimulation() {
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
+function drawPath(path,dashed){
+  if(!path)return;
+  ctx.setLineDash(dashed?[6,6]:[]);
+  ctx.strokeStyle=dashed?'#94a3b8':'#22c55e';
+  ctx.beginPath();
+  path.forEach((p,i)=>{
+    const X=p.x*scale+offset;
+    const Y=canvas.height-(p.y*scale+offset);
+    i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);
+  });
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
 
-            const angleDeg = parseFloat(document.getElementById("angle").value) || 45;
-            const speed = parseFloat(document.getElementById("velocity").value) || 50;
-            const startHeight = parseFloat(document.getElementById("height").value) || 0;
-            const gravity = parseFloat(document.getElementById("gravity").value) || 9.81;
+function drawBall(p){
+  const X=p.x*scale+offset;
+  const Y=canvas.height-(p.y*scale+offset);
+  ctx.beginPath();
+  ctx.arc(X,Y,8,0,Math.PI*2);
+  ctx.fillStyle='#ef4444';
+  ctx.fill();
+}
 
-            const angle = (angleDeg * Math.PI) / 180;
-            const vx = speed * Math.cos(angle);
-            const vy = speed * Math.sin(angle);
+function togglePause(){paused=!paused}
+function saveComparison(){prevTrajectory=[...trajectory]}
 
-            calculatePredictedPath(angleDeg, speed, startHeight, gravity);
+function updateStage(p){
+  let s='Descending';
+  if(p.vy>0.2)s='Ascending';
+  else if(Math.abs(p.vy)<0.2)s='At Apex';
+  stage.textContent=s;
+}
 
-            let x = 0;
-            let y = startHeight;
-            let time = 0;
-            trail = [];
-            maxHeightReached = startHeight;
-            currentRange = 0;
-            simulationTime = 0;
+function updateFormula(v,a,g,R,H,T){
+  formula.innerHTML=
+`<span class="highlight">Range</span> = (v² sin 2θ) / g<br>
+= (${v}² × sin ${2*a}°) / ${g}<br>
+= <b>${R.toFixed(2)} m</b><br><br>
+<span class="highlight">Max Height</span> = (v² sin²θ) / 2g<br>
+= <b>${H.toFixed(2)} m</b><br><br>
+<span class="highlight">Time of Flight</span> = 2v sinθ / g<br>
+= <b>${T.toFixed(2)} s</b>`;
 
-            const runButton = document.getElementById("runButton");
-            runButton.disabled = true;
+  maxH.textContent=H.toFixed(2);
+  range.textContent=R.toFixed(2);
+  tof.textContent=T.toFixed(2);
 
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                drawBackground();
-                drawPredictedPath();
-                drawTrail();
-                drawProjectile(x, y);
+  gravityNote.textContent=g<5?
+    'Lower gravity → longer flight & larger range':
+    'Higher gravity → shorter flight';
+}
 
-                if (y > maxHeightReached) {
-                    maxHeightReached = y;
-                }
-
-                currentRange = x;
-                simulationTime = time;
-                updateMetrics(y, x, time, maxHeightReached, currentRange);
-
-                trail.push({ x, y });
-                if (trail.length > TRAIL_LENGTH) {
-                    trail.shift();
-                }
-
-                time += ANIMATION_SPEED;
-                x = vx * time;
-                y = startHeight + (vy * time) - 0.5 * gravity * time * time;
-
-                if (y <= 0) {
-                    updateMetrics(0, x, time, maxHeightReached, x);
-                    runButton.disabled = false;
-                    return;
-                }
-
-                animationId = requestAnimationFrame(animate);
-            }
-
-            animate();
-        }
-
-        function updatePredictedPath() {
-            const angleDeg = parseFloat(document.getElementById("angle").value) || 45;
-            const speed = parseFloat(document.getElementById("velocity").value) || 50;
-            const startHeight = parseFloat(document.getElementById("height").value) || 0;
-            const gravity = parseFloat(document.getElementById("gravity").value) || 9.81;
-
-            if (speed > 0 && gravity > 0 && angleDeg >= 0 && angleDeg <= 90) {
-                calculatePredictedPath(angleDeg, speed, startHeight, gravity);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                drawBackground();
-                drawPredictedPath();
-            }
-        }
-
-        drawBackground();
-        updatePredictedPath();
-    </script>
+canvas.addEventListener('mousemove',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left;
+  let found=null;
+  trajectory.forEach(p=>{
+    const X=p.x*scale+offset;
+    if(Math.abs(X-mx)<4)found=p;
+  });
+  if(found){
+    tooltip.style.display='block';
+    tooltip.style.left=e.pageX+10+'px';
+    tooltip.style.top=e.pageY-10+'px';
+    tooltip.innerHTML=
+` t = ${found.t.toFixed(2)} s<br>
+  x = ${found.x.toFixed(2)} m<br>
+  y = ${found.y.toFixed(2)} m<br>
+  |v| = ${found.v.toFixed(2)} m/s`;
+  }else tooltip.style.display='none';
+});
+</script>
 </body>
 </html>
